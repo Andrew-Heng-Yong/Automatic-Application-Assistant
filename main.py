@@ -28,7 +28,7 @@ CONFIDENCE = 0.85
 CHECK_INTERVAL = 0.35
 DEFAULT_TIMEOUT = 10
 PAGE_READY_TIMEOUT = 30
-POST_APPLY_TIMEOUT = 12
+POST_APPLY_TIMEOUT = 1
 APPLY_RETRY_COUNT = 3
 MAX_SCROLL_PAGES = 20
 SCROLL_STEP = -700
@@ -165,7 +165,28 @@ def press_enter() -> None:
     pyautogui.press("enter")
     time.sleep(1.0)
 
+def recover_from_stale_apply_page() -> bool:
+    log("Stale page detected. Returning to search page...")
 
+    # First try browser back
+    pyautogui.hotkey("ctrl", "w")
+    time.sleep(1.5)
+
+    if image_exists(img("ww.png")):
+        log("Returned to search page with Control+W.")
+        return True
+
+    # Fallback: escape
+    pyautogui.press("esc")
+    time.sleep(1.0)
+
+    if image_exists(img("ww.png")):
+        log("Returned to search page with Esc.")
+        return True
+
+    save_debug_screenshot("stale_page_recovery_fail")
+    log("Could not recover to search page.")
+    return False
 # -----------------------------
 # Page checks
 # -----------------------------
@@ -231,27 +252,29 @@ def find_job_to_apply():
 # -----------------------------
 # Apply flow
 # -----------------------------
-def click_apply_and_wait_for_next_page(apply_pos) -> str:
+def click_apply_and_wait_for_next_page(apply_pos) -> str | None:
     next_markers = [img("psq.png")]
     optional_marker = img("app_option.png")
     if file_exists(optional_marker):
         next_markers.append(optional_marker)
     next_markers.append(img("create_custome_package.png"))
 
-    for attempt in range(1, APPLY_RETRY_COUNT + 1):
-        pyautogui.click(apply_pos[0], apply_pos[1])
-        log(f"Clicked apply (attempt {attempt})")
-        time.sleep(1.0)
+    pyautogui.click(apply_pos[0], apply_pos[1])
+    log("Clicked apply (attempt 1)")
+    time.sleep(1.0)
 
+    for check_idx in range(1, 6):
         found = wait_for_any_image(next_markers, timeout=POST_APPLY_TIMEOUT)
         if found:
             if found.endswith("psq.png"):
                 return "psq"
             return "app_options"
 
-    log("apply button error")
-    save_debug_screenshot("apply_button_error")
-    raise RuntimeError("apply button error")
+        log(f"Post-apply page check failed ({check_idx}/5)")
+
+    log("Stale page after apply.")
+    recover_from_stale_apply_page()
+    return None
 
 
 def handle_prescreen_if_needed(page_type: str) -> None:
@@ -441,9 +464,7 @@ def finish_application() -> None:
     if image_exists(img("confirm.png")):
         log("Confirm detected.")
         click_image(img("done.png"), timeout=5)
-    time.sleep(1)
-
-
+        time.sleep(1)
 # -----------------------------
 # Main loop
 # -----------------------------
@@ -453,6 +474,8 @@ def process_one_job() -> bool:
         return False
 
     page_type = click_apply_and_wait_for_next_page(target)
+    if page_type is None:
+        return True
     handle_prescreen_if_needed(page_type)
 
     if not open_quickview():
