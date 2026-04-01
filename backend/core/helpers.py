@@ -31,6 +31,7 @@ def log(msg: str) -> None:
 
 
 def save_debug_screenshot(prefix: str = "debug") -> str:
+    DEBUG_DIR.mkdir(parents=True, exist_ok=True)
     path = DEBUG_DIR / f"{prefix}_{timestamp()}.png"
     pyautogui.screenshot(str(path))
     log(f"Saved screenshot: {path.name}")
