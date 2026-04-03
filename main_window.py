@@ -11,7 +11,7 @@ from ui_main_window import Ui_MainWindow
 from config_manager import load_json, save_json
 import backend.core.automation as automation
 from backend.core.helpers import set_log_sink, log as helpers_log
-# include pause APIs from stop_flag
+# include pause APIs from state_handler
 from backend.core.state_handler import (
     request_stop,
     clear_stop,
@@ -20,6 +20,8 @@ from backend.core.state_handler import (
     clear_pause,
     is_pause_requested,
 )
+
+from overlay_window import OverlayWindow
 
 BASE_DIR = Path(__file__).resolve().parent
 
@@ -66,6 +68,8 @@ class MainWindow(QMainWindow):
         self.automation_thread: QThread | None = None
         self.automation_worker: AutomationWorker | None = None
         self.automation_running: bool = False
+        # Overlay instance
+        self.overlay_window: OverlayWindow | None = None
 
         # Connect buttons (existing)
         # Wire Run -> start_automation (QThread worker) and Stop -> stop_automation
@@ -254,6 +258,72 @@ class MainWindow(QMainWindow):
         save_json(str(self._gemini_config_path), cfg)
 
     # --------------------------
+    # Overlay helpers
+    # --------------------------
+    def ensure_overlay_window(self) -> None:
+        if self.overlay_window is None:
+            try:
+                self.overlay_window = OverlayWindow()
+                # Wire overlay buttons to main handlers
+                try:
+                    self.overlay_window.ui.OverlayRun.clicked.connect(self.start_automation)
+                except Exception:
+                    pass
+                try:
+                    self.overlay_window.ui.OverlayPause.clicked.connect(self.pause_automation)
+                except Exception:
+                    pass
+                try:
+                    self.overlay_window.ui.OverlayResume.clicked.connect(self.resume_automation)
+                except Exception:
+                    pass
+                try:
+                    self.overlay_window.ui.OverlayStop.clicked.connect(self.stop_automation)
+                except Exception:
+                    pass
+            except Exception:
+                self.overlay_window = None
+
+    def show_overlay_window(self) -> None:
+        try:
+            self.ensure_overlay_window()
+            if self.overlay_window is None:
+                return
+            self.overlay_window.set_running_state(self.automation_running, is_pause_requested())
+            self.overlay_window.bring_to_front()
+        except Exception:
+            pass
+
+    def close_overlay_window(self) -> None:
+        try:
+            if self.overlay_window is not None:
+                try:
+                    self.overlay_window.close()
+                except Exception:
+                    pass
+                self.overlay_window = None
+        except Exception:
+            pass
+
+    def sync_control_states(self) -> None:
+        # Apply button enabled/disabled state to both main UI and overlay if present
+        def _set_enabled(widget_names, enabled: bool) -> None:
+            for name in widget_names:
+                try:
+                    getattr(self.ui, name).setEnabled(enabled)
+                except Exception:
+                    pass
+            if self.overlay_window is not None:
+                for ov_name in ("OverlayRun", "OverlayPause", "OverlayResume", "OverlayStop"):
+                    try:
+                        w = getattr(self.overlay_window.ui, ov_name)
+                        # map based on name
+                        if ov_name == "OverlayRun":
+                            w.setEnabled(enabled if name in ("run", "button_run") else not enabled)
+                    except Exception:
+                        pass
+
+    # --------------------------
     # Automation control (QThread worker)
     # --------------------------
     def start_automation(self) -> None:
@@ -276,6 +346,12 @@ class MainWindow(QMainWindow):
         except Exception:
             pass
 
+        # Show overlay when starting
+        try:
+            self.show_overlay_window()
+        except Exception:
+            pass
+
         # Disable Run while running and enable Pause/Stop
         try:
             self.ui.run.setEnabled(False)
@@ -295,6 +371,13 @@ class MainWindow(QMainWindow):
                     w.setEnabled(True)
             except Exception:
                 pass
+
+        # reflect into overlay
+        try:
+            if self.overlay_window is not None:
+                self.overlay_window.set_running_state(True, False)
+        except Exception:
+            pass
 
         self.log_message("Automation started.")
 
@@ -365,10 +448,24 @@ class MainWindow(QMainWindow):
                 except Exception:
                     pass
 
+            # close overlay on stop
+            try:
+                if is_stop_requested():
+                    self.close_overlay_window()
+            except Exception:
+                pass
+
             if is_stop_requested():
                 self.log_message("Automation stopped.")
             else:
                 self.log_message("Automation finished.")
+
+            # update overlay state if present
+            try:
+                if self.overlay_window is not None:
+                    self.overlay_window.set_running_state(False, False)
+            except Exception:
+                pass
         except Exception:
             pass
 
@@ -402,6 +499,13 @@ class MainWindow(QMainWindow):
             except Exception:
                 pass
 
+        # reflect into overlay
+        try:
+            if self.overlay_window is not None:
+                self.overlay_window.set_running_state(True, True)
+        except Exception:
+            pass
+
     def resume_automation(self) -> None:
         # Resume the paused automation
         if not self.automation_running:
@@ -432,6 +536,13 @@ class MainWindow(QMainWindow):
             except Exception:
                 pass
 
+        # reflect into overlay
+        try:
+            if self.overlay_window is not None:
+                self.overlay_window.set_running_state(True, False)
+        except Exception:
+            pass
+
     def stop_automation(self) -> None:
         # Signal the automation to stop cooperatively without closing the UI
         if not self.automation_running:
@@ -458,6 +569,12 @@ class MainWindow(QMainWindow):
                     getattr(self.ui, w).setEnabled(False)
                 except Exception:
                     pass
+
+            # close overlay on stop
+            try:
+                self.close_overlay_window()
+            except Exception:
+                pass
 
             QMessageBox.information(self, "Stop", "Stop requested — automation will stop shortly.")
         except Exception as exc:
@@ -495,6 +612,13 @@ class MainWindow(QMainWindow):
         try:
             now = message
             self.ui.text_logs.appendPlainText(now)
+            # Also update overlay status stream with the latest line
+            try:
+                if self.overlay_window is not None:
+                    # Ensure UI update happens on main thread
+                    QTimer.singleShot(0, lambda: self.overlay_window.set_status_stream(now))
+            except Exception:
+                pass
         except Exception:
             pass
 

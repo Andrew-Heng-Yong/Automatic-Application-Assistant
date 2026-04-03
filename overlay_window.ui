@@ -22,7 +22,7 @@
     </widget>
    </item>
    <item>
-    <widget class="QLabel" name="StatusStreaming">
+    <widget class="QLabel" name="StatusStream">
      <property name="text">
       <string>Step: Waiting</string>
      </property>
@@ -31,9 +31,30 @@
    <item>
     <layout class="QHBoxLayout" name="buttonLayout">
      <item>
-      <widget class="QPushButton" name="Stop">
+      <widget class="QPushButton" name="OverlayRun">
        <property name="text">
-        <string>STOP</string>
+        <string>Run</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QPushButton" name="OverlayPause">
+       <property name="text">
+        <string>Pause</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QPushButton" name="OverlayResume">
+       <property name="text">
+        <string>Resume</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QPushButton" name="OverlayStop">
+       <property name="text">
+        <string>Stop</string>
        </property>
       </widget>
      </item>
