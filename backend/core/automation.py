@@ -5,6 +5,10 @@ from pathlib import Path
 
 import pyautogui
 import pyperclip
+import threading
+
+# Use shared stop_flag implementation so the same Event is visible across modules
+from backend.core.stop_flag import request_stop, clear_stop, is_stop_requested
 
 from backend.cover_letter_maker.cover_letter_maker import (
     generate_cover_letter,
@@ -131,6 +135,9 @@ def find_best_apply_on_current_view():
 
 def find_job_to_apply():
     for page_idx in range(MAX_SCROLL_PAGES):
+        if is_stop_requested():
+            log("Stop requested during job search.")
+            return None
         target = find_best_apply_on_current_view()
         if target:
             return target
@@ -179,7 +186,8 @@ def handle_prescreen_if_needed(page_type: str) -> None:
     if file_exists(optional_marker):
         markers.insert(0, optional_marker)
 
-    found = wait_for_any_image(markers, timeout=3600)
+    # Reduced timeout from 3600s to 10s for debugging / faster failure handling
+    found = wait_for_any_image(markers, timeout=10)
     if not found:
         save_debug_screenshot("prescreen_timeout")
         raise RuntimeError("prescreen timeout")
@@ -238,17 +246,59 @@ def generate_cover_letter_for_current_job(job_snippet: str, raw_quickview_text: 
     # Extract company name between Organization: and Division: from the raw quickview
     company_name = raw_quickview_text or "Unknown company"
 
-    if PREV_COMPANY_NAME == company_name and LAST_COVER_LETTER_PATH is not None:
-        resume_name, cover_letter_file_name = generate_cover_letter_minor_change(
-            job_snippet,
-            LAST_COVER_LETTER_PATH,
-            company_name=company_name,
-        )
-    else:
-        resume_name, cover_letter_file_name = generate_cover_letter(
-            job_snippet,
-            company_name=company_name,
-        )
+    # Run potentially long-running cover-letter generation in a thread with timeout
+    result: dict = {}
+
+    def _worker():
+        try:
+            if PREV_COMPANY_NAME == company_name and LAST_COVER_LETTER_PATH is not None:
+                resume_name, cover_letter_file_name = generate_cover_letter_minor_change(
+                    job_snippet,
+                    LAST_COVER_LETTER_PATH,
+                    company_name=company_name,
+                )
+            else:
+                resume_name, cover_letter_file_name = generate_cover_letter(
+                    job_snippet,
+                    company_name=company_name,
+                )
+            result["ok"] = True
+            result["resume_name"] = resume_name
+            result["cover_letter_file_name"] = cover_letter_file_name
+        except Exception as exc:
+            result["ok"] = False
+            result["error"] = exc
+
+    log("Starting cover letter generation (may take some time)")
+    save_debug_screenshot("before_generate_cover_letter")
+    thread = threading.Thread(target=_worker, daemon=True)
+    thread.start()
+
+    # Wait for worker but poll so we can respond to stop requests quickly
+    total_timeout = 120.0
+    poll_interval = 0.5
+    elapsed = 0.0
+    while thread.is_alive() and elapsed < total_timeout:
+        if is_stop_requested():
+            log("Stop requested during cover letter generation. Aborting wait.")
+            save_debug_screenshot("cover_letter_stop_requested")
+            raise RuntimeError("stop requested")
+        thread.join(poll_interval)
+        elapsed += poll_interval
+
+    if thread.is_alive():
+        log("Cover letter generation timed out after 120s.")
+        save_debug_screenshot("cover_letter_timeout")
+        raise RuntimeError("cover letter generation timeout")
+
+    if not result.get("ok"):
+        err = result.get("error")
+        log(f"Cover letter generation failed: {err}")
+        save_debug_screenshot("cover_letter_failure")
+        raise RuntimeError(f"cover letter generation error: {err}")
+
+    resume_name = result["resume_name"]
+    cover_letter_file_name = result["cover_letter_file_name"]
 
     cover_letter_path = latest_generated_pdf_path(cover_letter_file_name)
     PREV_COMPANY_NAME = company_name
@@ -362,6 +412,10 @@ def finish_application() -> None:
 # Main loop
 # -----------------------------
 def process_one_job() -> bool:
+    if is_stop_requested():
+        log("Stop requested before processing job.")
+        return False
+
     target = find_job_to_apply()
     if not target:
         return False
@@ -371,6 +425,11 @@ def process_one_job() -> bool:
         return True
     handle_prescreen_if_needed(page_type)
 
+    if is_stop_requested():
+        log("Stop requested after apply, aborting job.")
+        recover_from_stale_apply_page()
+        return False
+
     if not open_quickview():
         raise RuntimeError("quickview error")
     company_name, job_description = collect_quickview_text()
@@ -378,6 +437,10 @@ def process_one_job() -> bool:
         raise RuntimeError("quickview close error")
 
     resume_version_name, cover_letter_path = generate_cover_letter_for_current_job(job_description, company_name)
+
+    if is_stop_requested():
+        log("Stop requested before uploading, aborting job.")
+        return False
 
     if not go_to_application_options():
         raise RuntimeError("application options error")
@@ -401,6 +464,9 @@ def main() -> None:
         return
 
     while True:
+        if is_stop_requested():
+            log("Stop requested. Exiting main loop.")
+            break
         try:
             did_work = process_one_job()
         except RuntimeError as exc:

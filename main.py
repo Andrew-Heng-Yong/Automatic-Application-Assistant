@@ -3,12 +3,12 @@ from __future__ import annotations
 import sys
 from PySide6.QtWidgets import QApplication
 
-from ui_main_window import Ui_MainWindow
+from main_window import MainWindow
 
 
 def main() -> None:
     app = QApplication(sys.argv)
-    window = Ui_MainWindow()
+    window = MainWindow()
     window.show()
     sys.exit(app.exec())
 

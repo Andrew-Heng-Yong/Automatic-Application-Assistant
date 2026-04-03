@@ -8,6 +8,8 @@ import pyautogui
 import pyperclip
 
 from .app_config_loader import load_app_config
+# check stop flag to make helpers responsive
+from .stop_flag import is_stop_requested
 
 # Default image/confidence settings (will be overridden by config if provided)
 _cfg = {}
@@ -72,6 +74,9 @@ def find_center(image_path: str, confidence: float = CONFIDENCE, region=None):
 def wait_for_image(image_path: str, timeout: float = DEFAULT_TIMEOUT, confidence: float = CONFIDENCE, region=None):
     start = time.time()
     while time.time() - start < timeout:
+        if is_stop_requested():
+            log("Stop requested during wait_for_image; aborting wait")
+            return None
         pos = find_center(image_path, confidence=confidence, region=region)
         if pos:
             return pos
@@ -105,6 +110,9 @@ def image_exists(image_path: str, confidence: float = CONFIDENCE, region=None) -
 def wait_for_any_image(image_paths: list[str], timeout: float = DEFAULT_TIMEOUT, confidence: float = CONFIDENCE):
     start = time.time()
     while time.time() - start < timeout:
+        if is_stop_requested():
+            log("Stop requested during wait_for_any_image; aborting wait")
+            return None
         for image_path in image_paths:
             if file_exists(image_path) and image_exists(image_path, confidence=confidence):
                 return image_path

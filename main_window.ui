@@ -351,7 +351,7 @@
              <x>0</x>
              <y>0</y>
              <width>1031</width>
-             <height>1220</height>
+             <height>1339</height>
             </rect>
            </property>
            <layout class="QVBoxLayout" name="verticalLayout_gemini_content">
@@ -370,27 +370,27 @@
                <property name="verticalSpacing">
                 <number>10</number>
                </property>
-               <item row="0" column="0">
-                <widget class="QLabel" name="label_api_key">
+               <item row="1" column="0">
+                <widget class="QLabel" name="label_model_name">
                  <property name="text">
-                  <string>API_KEY</string>
+                  <string>MODEL_NAME</string>
                  </property>
                 </widget>
                </item>
                <item row="0" column="1">
                 <widget class="QLineEdit" name="edit_api_key">
                  <property name="text">
-                  <string>AIzaSyDSQrKHpkUJJHeFSq23YR_GgdLzd6W8lhU</string>
+                  <string/>
                  </property>
                  <property name="echoMode">
-                  <enum>QLineEdit::EchoMode::PasswordEchoOnEdit</enum>
+                  <enum>QLineEdit::EchoMode::Normal</enum>
                  </property>
                 </widget>
                </item>
-               <item row="1" column="0">
-                <widget class="QLabel" name="label_model_name">
+               <item row="0" column="0">
+                <widget class="QLabel" name="label_api_key">
                  <property name="text">
-                  <string>MODEL_NAME</string>
+                  <string>API_KEY</string>
                  </property>
                 </widget>
                </item>
@@ -401,34 +401,20 @@
                  </property>
                 </widget>
                </item>
-               <item row="2" column="0">
-                <widget class="QLabel" name="label_output_dir">
-                 <property name="text">
-                  <string>OUTPUT_DIR</string>
-                 </property>
-                </widget>
-               </item>
                <item row="2" column="1">
-                <widget class="QLineEdit" name="edit_output_dir">
-                 <property name="text">
-                  <string>generated_cover_letters</string>
-                 </property>
-                </widget>
-               </item>
-               <item row="3" column="0">
-                <widget class="QLabel" name="label_cover_letter_word_limit">
-                 <property name="text">
-                  <string>COVER_LETTER_WORD_LIMIT</string>
-                 </property>
-                </widget>
-               </item>
-               <item row="3" column="1">
                 <widget class="QSpinBox" name="spin_cover_letter_word_limit">
                  <property name="maximum">
                   <number>10000</number>
                  </property>
                  <property name="value">
                   <number>150</number>
+                 </property>
+                </widget>
+               </item>
+               <item row="2" column="0">
+                <widget class="QLabel" name="label_cover_letter_word_limit">
+                 <property name="text">
+                  <string>COVER_LETTER_WORD_LIMIT</string>
                  </property>
                 </widget>
                </item>
@@ -610,12 +596,7 @@ Preserve general tone and motivation, but make minor changes for the new role.</
                 <widget class="QPlainTextEdit" name="text_additional_personal_information">
                  <property name="plainText">
                   <string>use them selectively based on the job description: 
-Studying in Honours Mathematics at the University of Waterloo, with strong intention of declaring a Combinatorics and Optimization major
-Interested in data science, machine learning, algorithm design, and software engineering roles
-Interested in drone technology, and have experience building and programming drones (reference to resume)
-Have experience in Onshape, Solidworks, and ANSYS, as well as hardware prototyping and 3D printing
-Fluent in mandarin and shanghai dialect, Have chinese citizenship
-Former competitive swimmer, with experience in teamwork, discipline, and time management</string>
+</string>
                  </property>
                 </widget>
                </item>
@@ -624,12 +605,27 @@ Former competitive swimmer, with experience in teamwork, discipline, and time ma
             </item>
             <item>
              <widget class="QGroupBox" name="groupBox_resume_catalog">
+              <property name="sizePolicy">
+               <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+                <horstretch>0</horstretch>
+                <verstretch>0</verstretch>
+               </sizepolicy>
+              </property>
               <property name="title">
                <string>Resume Catalog</string>
               </property>
               <layout class="QVBoxLayout" name="verticalLayout_resume_catalog">
                <item>
                 <widget class="QTableWidget" name="table_resume_catalog">
+                 <property name="editTriggers">
+                  <set>QAbstractItemView::EditTrigger::AnyKeyPressed|QAbstractItemView::EditTrigger::DoubleClicked|QAbstractItemView::EditTrigger::EditKeyPressed</set>
+                 </property>
+                 <property name="selectionMode">
+                  <enum>QAbstractItemView::SelectionMode::SingleSelection</enum>
+                 </property>
+                 <property name="selectionBehavior">
+                  <enum>QAbstractItemView::SelectionBehavior::SelectRows</enum>
+                 </property>
                  <property name="rowCount">
                   <number>3</number>
                  </property>
@@ -684,6 +680,37 @@ Former competitive swimmer, with experience in teamwork, discipline, and time ma
                  </item>
                 </widget>
                </item>
+               <item>
+                <layout class="QHBoxLayout" name="horizontalLayout_resume_catalog_buttons">
+                 <item>
+                  <widget class="QPushButton" name="button_add_resume_row">
+                   <property name="text">
+                    <string>Add Row</string>
+                   </property>
+                  </widget>
+                 </item>
+                 <item>
+                  <widget class="QPushButton" name="button_remove_resume_row">
+                   <property name="text">
+                    <string>Remove Selected Row</string>
+                   </property>
+                  </widget>
+                 </item>
+                 <item>
+                  <spacer name="horizontalSpacer_resume_catalog_buttons">
+                   <property name="orientation">
+                    <enum>Qt::Orientation::Horizontal</enum>
+                   </property>
+                   <property name="sizeHint" stdset="0">
+                    <size>
+                     <width>40</width>
+                     <height>20</height>
+                    </size>
+                   </property>
+                  </spacer>
+                 </item>
+                </layout>
+               </item>
               </layout>
              </widget>
             </item>
@@ -734,6 +761,59 @@ Former competitive swimmer, with experience in teamwork, discipline, and time ma
            </widget>
           </item>
          </layout>
+        </item>
+       </layout>
+      </widget>
+      <widget class="QWidget" name="tab_logs">
+       <attribute name="title">
+        <string>Logs</string>
+       </attribute>
+       <layout class="QVBoxLayout" name="verticalLayout_logs_tab">
+        <property name="spacing">
+         <number>10</number>
+        </property>
+        <item>
+         <widget class="QGroupBox" name="groupBox_logs">
+          <property name="title">
+           <string>Application Logs</string>
+          </property>
+          <layout class="QVBoxLayout" name="verticalLayout_logs_group">
+           <item>
+            <widget class="QPlainTextEdit" name="text_logs">
+             <property name="readOnly">
+              <bool>true</bool>
+             </property>
+             <property name="placeholderText">
+              <string>Logs will appear here...</string>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <layout class="QHBoxLayout" name="horizontalLayout_logs_buttons">
+             <item>
+              <widget class="QPushButton" name="button_clear_logs">
+               <property name="text">
+                <string>Clear Logs</string>
+               </property>
+              </widget>
+             </item>
+             <item>
+              <spacer name="horizontalSpacer_logs_buttons">
+               <property name="orientation">
+                <enum>Qt::Orientation::Horizontal</enum>
+               </property>
+               <property name="sizeHint" stdset="0">
+                <size>
+                 <width>40</width>
+                 <height>20</height>
+                </size>
+               </property>
+              </spacer>
+             </item>
+            </layout>
+           </item>
+          </layout>
+         </widget>
         </item>
        </layout>
       </widget>

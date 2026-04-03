@@ -15,12 +15,12 @@ from PySide6.QtGui import (QBrush, QColor, QConicalGradient, QCursor,
     QFont, QFontDatabase, QGradient, QIcon,
     QImage, QKeySequence, QLinearGradient, QPainter,
     QPalette, QPixmap, QRadialGradient, QTransform)
-from PySide6.QtWidgets import (QApplication, QDoubleSpinBox, QGridLayout, QGroupBox,
-    QHBoxLayout, QHeaderView, QLabel, QLineEdit,
-    QMainWindow, QMenuBar, QPlainTextEdit, QPushButton,
-    QScrollArea, QSizePolicy, QSpacerItem, QSpinBox,
-    QStatusBar, QTabWidget, QTableWidget, QTableWidgetItem,
-    QVBoxLayout, QWidget)
+from PySide6.QtWidgets import (QAbstractItemView, QApplication, QDoubleSpinBox, QGridLayout,
+    QGroupBox, QHBoxLayout, QHeaderView, QLabel,
+    QLineEdit, QMainWindow, QMenuBar, QPlainTextEdit,
+    QPushButton, QScrollArea, QSizePolicy, QSpacerItem,
+    QSpinBox, QStatusBar, QTabWidget, QTableWidget,
+    QTableWidgetItem, QVBoxLayout, QWidget)
 
 class Ui_MainWindow(object):
     def setupUi(self, MainWindow):
@@ -233,7 +233,7 @@ class Ui_MainWindow(object):
         self.scrollArea_gemini.setWidgetResizable(True)
         self.scrollAreaWidgetContents_gemini = QWidget()
         self.scrollAreaWidgetContents_gemini.setObjectName(u"scrollAreaWidgetContents_gemini")
-        self.scrollAreaWidgetContents_gemini.setGeometry(QRect(0, 0, 1031, 1220))
+        self.scrollAreaWidgetContents_gemini.setGeometry(QRect(0, 0, 1031, 1339))
         self.verticalLayout_gemini_content = QVBoxLayout(self.scrollAreaWidgetContents_gemini)
         self.verticalLayout_gemini_content.setSpacing(12)
         self.verticalLayout_gemini_content.setObjectName(u"verticalLayout_gemini_content")
@@ -243,48 +243,38 @@ class Ui_MainWindow(object):
         self.gridLayout_gemini_basic.setObjectName(u"gridLayout_gemini_basic")
         self.gridLayout_gemini_basic.setHorizontalSpacing(16)
         self.gridLayout_gemini_basic.setVerticalSpacing(10)
-        self.label_api_key = QLabel(self.groupBox_gemini_basic)
-        self.label_api_key.setObjectName(u"label_api_key")
-
-        self.gridLayout_gemini_basic.addWidget(self.label_api_key, 0, 0, 1, 1)
-
-        self.edit_api_key = QLineEdit(self.groupBox_gemini_basic)
-        self.edit_api_key.setObjectName(u"edit_api_key")
-        self.edit_api_key.setEchoMode(QLineEdit.EchoMode.PasswordEchoOnEdit)
-
-        self.gridLayout_gemini_basic.addWidget(self.edit_api_key, 0, 1, 1, 1)
-
         self.label_model_name = QLabel(self.groupBox_gemini_basic)
         self.label_model_name.setObjectName(u"label_model_name")
 
         self.gridLayout_gemini_basic.addWidget(self.label_model_name, 1, 0, 1, 1)
+
+        self.edit_api_key = QLineEdit(self.groupBox_gemini_basic)
+        self.edit_api_key.setObjectName(u"edit_api_key")
+        self.edit_api_key.setEchoMode(QLineEdit.EchoMode.Normal)
+
+        self.gridLayout_gemini_basic.addWidget(self.edit_api_key, 0, 1, 1, 1)
+
+        self.label_api_key = QLabel(self.groupBox_gemini_basic)
+        self.label_api_key.setObjectName(u"label_api_key")
+
+        self.gridLayout_gemini_basic.addWidget(self.label_api_key, 0, 0, 1, 1)
 
         self.edit_model_name = QLineEdit(self.groupBox_gemini_basic)
         self.edit_model_name.setObjectName(u"edit_model_name")
 
         self.gridLayout_gemini_basic.addWidget(self.edit_model_name, 1, 1, 1, 1)
 
-        self.label_output_dir = QLabel(self.groupBox_gemini_basic)
-        self.label_output_dir.setObjectName(u"label_output_dir")
-
-        self.gridLayout_gemini_basic.addWidget(self.label_output_dir, 2, 0, 1, 1)
-
-        self.edit_output_dir = QLineEdit(self.groupBox_gemini_basic)
-        self.edit_output_dir.setObjectName(u"edit_output_dir")
-
-        self.gridLayout_gemini_basic.addWidget(self.edit_output_dir, 2, 1, 1, 1)
-
-        self.label_cover_letter_word_limit = QLabel(self.groupBox_gemini_basic)
-        self.label_cover_letter_word_limit.setObjectName(u"label_cover_letter_word_limit")
-
-        self.gridLayout_gemini_basic.addWidget(self.label_cover_letter_word_limit, 3, 0, 1, 1)
-
         self.spin_cover_letter_word_limit = QSpinBox(self.groupBox_gemini_basic)
         self.spin_cover_letter_word_limit.setObjectName(u"spin_cover_letter_word_limit")
         self.spin_cover_letter_word_limit.setMaximum(10000)
         self.spin_cover_letter_word_limit.setValue(150)
 
-        self.gridLayout_gemini_basic.addWidget(self.spin_cover_letter_word_limit, 3, 1, 1, 1)
+        self.gridLayout_gemini_basic.addWidget(self.spin_cover_letter_word_limit, 2, 1, 1, 1)
+
+        self.label_cover_letter_word_limit = QLabel(self.groupBox_gemini_basic)
+        self.label_cover_letter_word_limit.setObjectName(u"label_cover_letter_word_limit")
+
+        self.gridLayout_gemini_basic.addWidget(self.label_cover_letter_word_limit, 2, 0, 1, 1)
 
 
         self.verticalLayout_gemini_content.addWidget(self.groupBox_gemini_basic)
@@ -384,6 +374,11 @@ class Ui_MainWindow(object):
 
         self.groupBox_resume_catalog = QGroupBox(self.scrollAreaWidgetContents_gemini)
         self.groupBox_resume_catalog.setObjectName(u"groupBox_resume_catalog")
+        sizePolicy = QSizePolicy(QSizePolicy.Policy.Preferred, QSizePolicy.Policy.Fixed)
+        sizePolicy.setHorizontalStretch(0)
+        sizePolicy.setVerticalStretch(0)
+        sizePolicy.setHeightForWidth(self.groupBox_resume_catalog.sizePolicy().hasHeightForWidth())
+        self.groupBox_resume_catalog.setSizePolicy(sizePolicy)
         self.verticalLayout_resume_catalog = QVBoxLayout(self.groupBox_resume_catalog)
         self.verticalLayout_resume_catalog.setObjectName(u"verticalLayout_resume_catalog")
         self.table_resume_catalog = QTableWidget(self.groupBox_resume_catalog)
@@ -408,11 +403,33 @@ class Ui_MainWindow(object):
         __qtablewidgetitem7 = QTableWidgetItem()
         self.table_resume_catalog.setItem(2, 1, __qtablewidgetitem7)
         self.table_resume_catalog.setObjectName(u"table_resume_catalog")
+        self.table_resume_catalog.setEditTriggers(QAbstractItemView.EditTrigger.AnyKeyPressed|QAbstractItemView.EditTrigger.DoubleClicked|QAbstractItemView.EditTrigger.EditKeyPressed)
+        self.table_resume_catalog.setSelectionMode(QAbstractItemView.SelectionMode.SingleSelection)
+        self.table_resume_catalog.setSelectionBehavior(QAbstractItemView.SelectionBehavior.SelectRows)
         self.table_resume_catalog.setRowCount(3)
         self.table_resume_catalog.setColumnCount(2)
         self.table_resume_catalog.horizontalHeader().setStretchLastSection(True)
 
         self.verticalLayout_resume_catalog.addWidget(self.table_resume_catalog)
+
+        self.horizontalLayout_resume_catalog_buttons = QHBoxLayout()
+        self.horizontalLayout_resume_catalog_buttons.setObjectName(u"horizontalLayout_resume_catalog_buttons")
+        self.button_add_resume_row = QPushButton(self.groupBox_resume_catalog)
+        self.button_add_resume_row.setObjectName(u"button_add_resume_row")
+
+        self.horizontalLayout_resume_catalog_buttons.addWidget(self.button_add_resume_row)
+
+        self.button_remove_resume_row = QPushButton(self.groupBox_resume_catalog)
+        self.button_remove_resume_row.setObjectName(u"button_remove_resume_row")
+
+        self.horizontalLayout_resume_catalog_buttons.addWidget(self.button_remove_resume_row)
+
+        self.horizontalSpacer_resume_catalog_buttons = QSpacerItem(40, 20, QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Minimum)
+
+        self.horizontalLayout_resume_catalog_buttons.addItem(self.horizontalSpacer_resume_catalog_buttons)
+
+
+        self.verticalLayout_resume_catalog.addLayout(self.horizontalLayout_resume_catalog_buttons)
 
 
         self.verticalLayout_gemini_content.addWidget(self.groupBox_resume_catalog)
@@ -445,6 +462,39 @@ class Ui_MainWindow(object):
         self.verticalLayout_gemini_tab.addLayout(self.horizontalLayout_gemini_buttons)
 
         self.tabWidget.addTab(self.tab_gemini_config, "")
+        self.tab_logs = QWidget()
+        self.tab_logs.setObjectName(u"tab_logs")
+        self.verticalLayout_logs_tab = QVBoxLayout(self.tab_logs)
+        self.verticalLayout_logs_tab.setSpacing(10)
+        self.verticalLayout_logs_tab.setObjectName(u"verticalLayout_logs_tab")
+        self.groupBox_logs = QGroupBox(self.tab_logs)
+        self.groupBox_logs.setObjectName(u"groupBox_logs")
+        self.verticalLayout_logs_group = QVBoxLayout(self.groupBox_logs)
+        self.verticalLayout_logs_group.setObjectName(u"verticalLayout_logs_group")
+        self.text_logs = QPlainTextEdit(self.groupBox_logs)
+        self.text_logs.setObjectName(u"text_logs")
+        self.text_logs.setReadOnly(True)
+
+        self.verticalLayout_logs_group.addWidget(self.text_logs)
+
+        self.horizontalLayout_logs_buttons = QHBoxLayout()
+        self.horizontalLayout_logs_buttons.setObjectName(u"horizontalLayout_logs_buttons")
+        self.button_clear_logs = QPushButton(self.groupBox_logs)
+        self.button_clear_logs.setObjectName(u"button_clear_logs")
+
+        self.horizontalLayout_logs_buttons.addWidget(self.button_clear_logs)
+
+        self.horizontalSpacer_logs_buttons = QSpacerItem(40, 20, QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Minimum)
+
+        self.horizontalLayout_logs_buttons.addItem(self.horizontalSpacer_logs_buttons)
+
+
+        self.verticalLayout_logs_group.addLayout(self.horizontalLayout_logs_buttons)
+
+
+        self.verticalLayout_logs_tab.addWidget(self.groupBox_logs)
+
+        self.tabWidget.addTab(self.tab_logs, "")
 
         self.verticalLayout_main.addWidget(self.tabWidget)
 
@@ -507,12 +557,10 @@ class Ui_MainWindow(object):
         self.button_save_app_config.setText(QCoreApplication.translate("MainWindow", u"Save Config", None))
         self.tabWidget.setTabText(self.tabWidget.indexOf(self.tab_app_config), QCoreApplication.translate("MainWindow", u"App Config", None))
         self.groupBox_gemini_basic.setTitle(QCoreApplication.translate("MainWindow", u"Basic Gemini Settings", None))
-        self.label_api_key.setText(QCoreApplication.translate("MainWindow", u"API_KEY", None))
-        self.edit_api_key.setText(QCoreApplication.translate("MainWindow", u"AIzaSyDSQrKHpkUJJHeFSq23YR_GgdLzd6W8lhU", None))
         self.label_model_name.setText(QCoreApplication.translate("MainWindow", u"MODEL_NAME", None))
+        self.edit_api_key.setText("")
+        self.label_api_key.setText(QCoreApplication.translate("MainWindow", u"API_KEY", None))
         self.edit_model_name.setText(QCoreApplication.translate("MainWindow", u"gemini-2.5-flash", None))
-        self.label_output_dir.setText(QCoreApplication.translate("MainWindow", u"OUTPUT_DIR", None))
-        self.edit_output_dir.setText(QCoreApplication.translate("MainWindow", u"generated_cover_letters", None))
         self.label_cover_letter_word_limit.setText(QCoreApplication.translate("MainWindow", u"COVER_LETTER_WORD_LIMIT", None))
         self.groupBox_resume_selection_prompts.setTitle(QCoreApplication.translate("MainWindow", u"Resume Selection Prompts", None))
         self.label_resume_selection_system_prompt.setText(QCoreApplication.translate("MainWindow", u"RESUME_SELECTION_SYSTEM_PROMPT", None))
@@ -585,12 +633,7 @@ class Ui_MainWindow(object):
 "Preserve general tone and motivation, but make minor changes for the new role.", None))
         self.groupBox_additional_info.setTitle(QCoreApplication.translate("MainWindow", u"Additional Personal Information", None))
         self.text_additional_personal_information.setPlainText(QCoreApplication.translate("MainWindow", u"use them selectively based on the job description: \n"
-"Studying in Honours Mathematics at the University of Waterloo, with strong intention of declaring a Combinatorics and Optimization major\n"
-"Interested in data science, machine learning, algorithm design, and software engineering roles\n"
-"Interested in drone technology, and have experience building and programming drones (reference to resume)\n"
-"Have experience in Onshape, Solidworks, and ANSYS, as well as hardware prototyping and 3D printing\n"
-"Fluent in mandarin and shanghai dialect, Have chinese citizenship\n"
-"Former competitive swimmer, with experience in teamwork, discipline, and time management", None))
+"", None))
         self.groupBox_resume_catalog.setTitle(QCoreApplication.translate("MainWindow", u"Resume Catalog", None))
         ___qtablewidgetitem = self.table_resume_catalog.horizontalHeaderItem(0)
         ___qtablewidgetitem.setText(QCoreApplication.translate("MainWindow", u"Name", None))
@@ -613,9 +656,15 @@ class Ui_MainWindow(object):
         ___qtablewidgetitem7.setText(QCoreApplication.translate("MainWindow", u"complete resume with all experience, including detailed description, but this is too long for most postings", None))
         self.table_resume_catalog.setSortingEnabled(__sortingEnabled)
 
+        self.button_add_resume_row.setText(QCoreApplication.translate("MainWindow", u"Add Row", None))
+        self.button_remove_resume_row.setText(QCoreApplication.translate("MainWindow", u"Remove Selected Row", None))
         self.button_load_gemini_config.setText(QCoreApplication.translate("MainWindow", u"Load Config", None))
         self.button_save_gemini_config.setText(QCoreApplication.translate("MainWindow", u"Save Config", None))
         self.tabWidget.setTabText(self.tabWidget.indexOf(self.tab_gemini_config), QCoreApplication.translate("MainWindow", u"Gemini Config", None))
+        self.groupBox_logs.setTitle(QCoreApplication.translate("MainWindow", u"Application Logs", None))
+        self.text_logs.setPlaceholderText(QCoreApplication.translate("MainWindow", u"Logs will appear here...", None))
+        self.button_clear_logs.setText(QCoreApplication.translate("MainWindow", u"Clear Logs", None))
+        self.tabWidget.setTabText(self.tabWidget.indexOf(self.tab_logs), QCoreApplication.translate("MainWindow", u"Logs", None))
         self.button_run.setText(QCoreApplication.translate("MainWindow", u"Run", None))
         self.button_stop.setText(QCoreApplication.translate("MainWindow", u"Stop", None))
     # retranslateUi
