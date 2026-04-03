@@ -451,7 +451,8 @@ class MainWindow(QMainWindow):
             # close overlay on stop
             try:
                 if is_stop_requested():
-                    self.close_overlay_window()
+                    # Close overlay on main thread
+                    QTimer.singleShot(0, lambda: self.close_overlay_window())
             except Exception:
                 pass
 
@@ -462,8 +463,8 @@ class MainWindow(QMainWindow):
 
             # update overlay state if present
             try:
-                if self.overlay_window is not None:
-                    self.overlay_window.set_running_state(False, False)
+                # Use UI-thread safe setter
+                QTimer.singleShot(0, lambda: self._overlay_set_running_state(False, False))
             except Exception:
                 pass
         except Exception:
@@ -501,8 +502,7 @@ class MainWindow(QMainWindow):
 
         # reflect into overlay
         try:
-            if self.overlay_window is not None:
-                self.overlay_window.set_running_state(True, True)
+            QTimer.singleShot(0, lambda: self._overlay_set_running_state(True, True))
         except Exception:
             pass
 
@@ -538,8 +538,7 @@ class MainWindow(QMainWindow):
 
         # reflect into overlay
         try:
-            if self.overlay_window is not None:
-                self.overlay_window.set_running_state(True, False)
+            QTimer.singleShot(0, lambda: self._overlay_set_running_state(True, False))
         except Exception:
             pass
 
@@ -570,9 +569,9 @@ class MainWindow(QMainWindow):
                 except Exception:
                     pass
 
-            # close overlay on stop
+            # close overlay on stop (main thread)
             try:
-                self.close_overlay_window()
+                QTimer.singleShot(0, lambda: self.close_overlay_window())
             except Exception:
                 pass
 
@@ -615,10 +614,24 @@ class MainWindow(QMainWindow):
             # Also update overlay status stream with the latest line
             try:
                 if self.overlay_window is not None:
-                    # Ensure UI update happens on main thread
-                    QTimer.singleShot(0, lambda: self.overlay_window.set_status_stream(now))
+                    # Schedule safe overlay update on main thread
+                    QTimer.singleShot(0, lambda text=now: self._overlay_set_status_stream(text))
             except Exception:
                 pass
+        except Exception:
+            pass
+
+    def _overlay_set_status_stream(self, text: str) -> None:
+        try:
+            if self.overlay_window is not None and hasattr(self.overlay_window, "set_status_stream"):
+                self.overlay_window.set_status_stream(text)
+        except Exception:
+            pass
+
+    def _overlay_set_running_state(self, running: bool, paused: bool) -> None:
+        try:
+            if self.overlay_window is not None and hasattr(self.overlay_window, "set_running_state"):
+                self.overlay_window.set_running_state(running, paused)
         except Exception:
             pass
 
