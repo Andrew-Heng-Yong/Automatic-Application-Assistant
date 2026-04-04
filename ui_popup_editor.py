@@ -54,6 +54,6 @@ class Ui_PopupEditer(object):
     def retranslateUi(self, PopupEditer):
         PopupEditer.setWindowTitle(QCoreApplication.translate("PopupEditer", u"Popup Editor", None))
         self.titleLabel.setText(QCoreApplication.translate("PopupEditer", u"Cover Letter Editer", None))
-        self.ContinueButton.setText(QCoreApplication.translate("PopupEditer", u"Save", None))
+        self.ContinueButton.setText(QCoreApplication.translate("PopupEditer", u"Continue", None))
     # retranslateUi
 

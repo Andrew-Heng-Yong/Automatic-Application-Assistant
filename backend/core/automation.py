@@ -71,17 +71,17 @@ def is_manual_override_mode() -> bool:
     return bool(cfg.get("use_text_editor", False)) and bool(cfg.get("generater_deployment_override", False))
 
 
-def get_manual_cover_letter_after_package_click(company_name: str) -> tuple[Path, str]:
+def get_manual_cover_letter_after_package_click(company_name: str, job_description: str) -> tuple[Path, str]:
     """Show popup editor for manual cover letter entry and save the result to a PDF.
 
     Returns: (cover_letter_path, resume_name_placeholder)
     - resume_name_placeholder is 'manual' so calling code knows resume was user-selected.
+
+    The popup is prefilled with the extracted job_description only (no extra guidance text).
     """
-    # Prepare guidance text shown in the popup
-    guidance = (
-        "Write or paste the cover letter here.\n"
-        "Select the resume on the webpage manually before pressing Continue.\n\n"
-    )
+
+    # Prefill the popup with JUST the extracted job description (or empty string)
+    guidance = job_description or ""
 
     log("Deployment override mode active: skipping Gemini. Opening manual editor popup.")
 
@@ -615,7 +615,7 @@ def process_one_job() -> bool:
         log("Manual deployment override enabled: skipping Gemini and automated resume selection.")
         # This will open the popup editor for the user to write/paste the cover letter,
         # and the user is expected to manually select the resume on the webpage before Continue.
-        cover_letter_path, resume_version_name = get_manual_cover_letter_after_package_click(company_name)
+        cover_letter_path, resume_version_name = get_manual_cover_letter_after_package_click(company_name, job_description)
 
         log("Manual cover letter entry complete. Resuming automation. Resume selection is expected to be manual on the page.")
 

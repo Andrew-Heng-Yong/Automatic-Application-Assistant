@@ -29,7 +29,7 @@
      <item>
       <widget class="QPushButton" name="ContinueButton">
        <property name="text">
-        <string>Save</string>
+        <string>Continue</string>
        </property>
       </widget>
      </item>

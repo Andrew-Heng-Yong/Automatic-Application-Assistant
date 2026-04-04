@@ -22,7 +22,8 @@ class Ui_OverlayWindow(object):
     def setupUi(self, OverlayWindow):
         if not OverlayWindow.objectName():
             OverlayWindow.setObjectName(u"OverlayWindow")
-        OverlayWindow.resize(280, 100)
+        OverlayWindow.resize(380, 100)
+        OverlayWindow.setMaximumSize(QSize(380, 100))
         self.verticalLayout = QVBoxLayout(OverlayWindow)
         self.verticalLayout.setObjectName(u"verticalLayout")
         self.Status = QLabel(OverlayWindow)
